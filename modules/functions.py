@@ -5,6 +5,8 @@ from sklearn.linear_model import LinearRegression
 
 from sklearn.preprocessing import PolynomialFeatures
 
+from sklearn.ensemble import RandomForestRegressor
+
 def scale_data(X, y):
     """
     
@@ -39,14 +41,15 @@ def run_linear_regression(X, y):
     
     Returns
     -------
-    R**2 score, numpy array of predictions for the target variable 
+    numpy array of predictions for the target variable , R**2 training score, R**2 testing score 
     """
     X_test, X_train, y_test, y_train = train_test_split(X, y, train_size=0.8)
     model = LinearRegression()
     model = model.fit(X_train, y_train)
     y_pred = model.predict(X_test)
-    r2 = model.score(X_test, y_test)
-    return r2, y_pred
+    r2_train = model.score(X_train, y_train)
+    r2_test = model.score(X_test, y_test)
+    return y_pred, r2_train, r2_test
 
 
 def run_polynomial_regression(X, y, degree):
@@ -73,11 +76,40 @@ def run_polynomial_regression(X, y, degree):
     model = LinearRegression()
     model.fit(X_train, y_train)
     y_pred = model.predict(X_test)
-    train_score = model.score(X_train, y_train)
-    test_score = model.score(X_test, y_test)
+    r2_train = model.score(X_train, y_train)
+    r2_test = model.score(X_test, y_test)
     print("---Results---")
     print(f"degree = {degree}")
-    print(f"Train score = {train_score}")
-    print(f"Test score = {test_score}")
-    return y_pred, train_score, test_score
+    print(f"Train score = {r2_train}")
+    print(f"Test score = {r2_test}")
+    return y_pred, r2_train, r2_test
 
+
+def run_random_forest(X, y, n_estimators=100, max_depth=10):
+    """
+    
+    Run a random forest regression. Prints out the training score and the testing score
+
+    Parameters
+    ----------
+    X : Pandas DataFrame or numpy array of feature variables
+    
+    y : Pandas Series or numpy array of target variable
+
+    n_estimators : number of trees in the forest
+
+    mac_depth : max depth of each tree
+    
+    Returns
+    -------
+    numpy array of predictions for the target variable , R**2 training score, R**2 testing score
+    """
+    model = RandomForestRegressor(n_estimators=n_estimators, max_depth=max_depth)
+    X_test, X_train, y_test, y_train = train_test_split(X, y, train_size=0.8)
+    model.fit(X_train, y_train)
+    y_pred = model.predict(X_test)
+    r2_train = model.score(X_train, y_train)
+    r2_test = model.score(X_test, y_test)
+    print(f"train score = {r2_train}")
+    print(f"test score = {r2_test}")
+    return y_pred, r2_train, r2_test
