@@ -1,3 +1,6 @@
+import pandas as pd
+import numpy as np
+
 from sklearn.preprocessing import StandardScaler
 
 from sklearn.model_selection import train_test_split
@@ -6,6 +9,40 @@ from sklearn.linear_model import LinearRegression
 from sklearn.preprocessing import PolynomialFeatures
 
 from sklearn.ensemble import RandomForestRegressor
+
+
+def to_hours(s):
+    """
+    
+    Convert military format to hours past midnight. Rounded to 2 decimal places.
+
+    e.g. 930 --> 9.5, 1245 --> 12.75
+
+    Caution: integers that are not valid times will not throw an error, but results will
+             be nonsensical. check your data beforehand.
+    
+    e.g. 590 --> 5.15
+
+    Parameters
+    ----------
+    s : Pandas Series in military time format
+
+    Returns
+    -------
+    Pandas Series with dtype float
+    """
+    # change times like '560' to '600' etc. This is actually not necessary unless you round
+    # the military time values beforehand so I think I'll comment it out
+    ### s.loc[s.astype(str).str.endswith("60")] = s.loc[s.astype(str).str.endswith("60")].values + 40 
+
+    # converting military time to 'continuous time' (e.g. 830 = 8.5)
+    times = (s / 100).values.astype(str)
+    minutes = np.array([round(int(time.split(".")[1])/60, 2) for time in list(times)])
+    hour = (s // 100).values
+    hours = hour + minutes
+    s = pd.Series(hours)
+    return s
+
 
 def scale_data(X, y):
     """
@@ -98,7 +135,7 @@ def run_random_forest(X, y, n_estimators=100, max_depth=10):
 
     n_estimators : number of trees in the forest
 
-    mac_depth : max depth of each tree
+    max_depth : max depth of each tree
     
     Returns
     -------
