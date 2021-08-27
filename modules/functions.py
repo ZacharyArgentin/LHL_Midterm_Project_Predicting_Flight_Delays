@@ -33,7 +33,10 @@ def to_hours(s):
     """
     # change times like '560' to '600' etc. This is actually not necessary unless you round
     # the military time values beforehand so I think I'll comment it out
-    ### s.loc[s.astype(str).str.endswith("60")] = s.loc[s.astype(str).str.endswith("60")].values + 40 
+    ##s.loc[s.astype(str).str.endswith("60")] = s.loc[s.astype(str).str.endswith("60")].values + 40 
+    
+    # convert times like '2400' to '0'. I know it's messy but it works and I just don;t have time right now.
+    s.loc[s.astype(str).str.endswith("2400")] = s.loc[s.astype(str).str.endswith("2400")].values - 2400 
 
     # converting military time to 'continuous time' (e.g. 830 = 8.5)
     times = (s / 100).values.astype(str)
@@ -57,7 +60,9 @@ def scale_data(X, y):
     
     Returns
     -------
-    X_scaled, y_scaled
+    numpy arrays
+
+    (X_scaled, y_scaled)
     """
     scaler = StandardScaler()
     X_scaled = scaler.fit_transform(X)
@@ -78,7 +83,7 @@ def run_linear_regression(X, y):
     
     Returns
     -------
-    numpy array of predictions for the target variable , R**2 training score, R**2 testing score 
+    trained model, numpy array of predictions for the target variable , R**2 training score, R**2 testing score 
     """
     X_test, X_train, y_test, y_train = train_test_split(X, y, train_size=0.8)
     model = LinearRegression()
@@ -86,7 +91,7 @@ def run_linear_regression(X, y):
     y_pred = model.predict(X_test)
     r2_train = model.score(X_train, y_train)
     r2_test = model.score(X_test, y_test)
-    return y_pred, r2_train, r2_test
+    return model, y_pred, r2_train, r2_test
 
 
 def run_polynomial_regression(X, y, degree):
@@ -105,7 +110,7 @@ def run_polynomial_regression(X, y, degree):
     
     Returns
     -------
-    numpy array of predictions for the target variable , R**2 training score, R**2 testing score
+    trained model, numpy array of predictions for the target variable , R**2 training score, R**2 testing score
     """
     poly = PolynomialFeatures(degree)
     X = poly.fit_transform(X)
@@ -119,7 +124,7 @@ def run_polynomial_regression(X, y, degree):
     print(f"degree = {degree}")
     print(f"Train score = {r2_train}")
     print(f"Test score = {r2_test}")
-    return y_pred, r2_train, r2_test
+    return model, y_pred, r2_train, r2_test
 
 
 def run_random_forest(X, y, n_estimators=100, max_depth=10):
@@ -139,7 +144,7 @@ def run_random_forest(X, y, n_estimators=100, max_depth=10):
     
     Returns
     -------
-    numpy array of predictions for the target variable , R**2 training score, R**2 testing score
+    trained model, numpy array of predictions for the target variable , R**2 training score, R**2 testing score
     """
     model = RandomForestRegressor(n_estimators=n_estimators, max_depth=max_depth)
     X_test, X_train, y_test, y_train = train_test_split(X, y, train_size=0.8)
@@ -149,4 +154,6 @@ def run_random_forest(X, y, n_estimators=100, max_depth=10):
     r2_test = model.score(X_test, y_test)
     print(f"train score = {r2_train}")
     print(f"test score = {r2_test}")
-    return y_pred, r2_train, r2_test
+    return model, y_pred, r2_train, r2_test
+
+
